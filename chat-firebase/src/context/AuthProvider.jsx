@@ -17,10 +17,12 @@ function AuthProvider({ children }) {
         setUser({ displayName, email, uid, photoURL });
         setIsLoading(false);
         history.push("/");
+        return;
       }
       setUser({});
       setIsLoading(false);
       history.push("/login");
+      return;
     });
     return () => {
       unsubscribe();

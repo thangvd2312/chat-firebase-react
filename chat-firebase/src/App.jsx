@@ -1,4 +1,5 @@
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
+import 'antd/dist/reset.css';
 import "./App.css";
 import Login from "@/components/Login";
 import ChatRoom from "@/components/ChatRoom";

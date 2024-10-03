@@ -1,28 +1,37 @@
 import { Row, Col, Typography, Button } from "antd";
 import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
+import { auth, db } from "@/firebase/config";
+import {
+  FacebookAuthProvider,
+  signInWithPopup,
+  getAdditionalUserInfo,
+} from "firebase/auth";
+// import { addDoc, collection, doc } from "firebase/firestore";
+import { addDocument } from "@/firebase/service";
 const { Title } = Typography;
-import { auth } from "@/firebase/config";
-import { FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
 function Login() {
-  function handleLoginWithFacebook() {
+  async function handleLoginWithFacebook() {
     const provider = new FacebookAuthProvider();
     signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(result);
+      .then(async (result) => {
         const credential = FacebookAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        console.log(token);
+        const additionalUserInfo = getAdditionalUserInfo(result);
+        if (additionalUserInfo.isNewUser) {
+          const data = {
+            displayName: result.user.displayName,
+            email: result.user.email,
+            photoURL: result.user.photoURL,
+            uid: result.user.uid,
+            providerId: additionalUserInfo.providerId,
+          }
+          const uid = await addDocument("users", data);
+          console.log('new user: ', uid);
+        }
       })
       .catch((error) => {
         console.log(error);
       });
   }
-
-  // auth.onAuthStateChanged((user) => {
-  //   if (user) {
-  //     navigate("/");
-  //   }
-  // });
   return (
     <div>
       <Row justify="center">
@@ -39,7 +48,11 @@ function Login() {
           </Button>
         </Col>
         <Col className="gutter-row" span={12}>
-          <Button type="primary" icon={<FacebookOutlined />} onClick={handleLoginWithFacebook}>
+          <Button
+            type="primary"
+            icon={<FacebookOutlined />}
+            onClick={handleLoginWithFacebook}
+          >
             Đăng nhập bằng Facebook
           </Button>
         </Col>
