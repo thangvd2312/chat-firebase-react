@@ -13,6 +13,7 @@
     "@ant-design/icons": "^5.5.1",
     "antd": "^5.21.2",
     "date-fns": "^4.1.0",
+    "emoji-picker-react": "^4.12.0",
     "firebase": "^10.14.0",
     "lodash": "^4.17.21",
     "path": "^0.12.7",

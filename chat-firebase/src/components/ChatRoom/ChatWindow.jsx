@@ -7,6 +7,7 @@ import { UserAddOutlined } from "@ant-design/icons";
 import { Alert, Avatar, Button, Form, Input, Tooltip } from "antd";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import Picker from "emoji-picker-react";
 import Background from "@/assets/bg-chat.png";
 const HeaderStyled = styled.div`
   display: flex;
@@ -96,6 +97,7 @@ export default function ChatWindow() {
   } = useContext(AppContext);
   const [form] = Form.useForm();
   const [inputMessage, setInputMessage] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
   const inputRef = useRef(null);
   const messageListRef = useRef(null);
   function handleInputChange(e) {
@@ -116,6 +118,13 @@ export default function ChatWindow() {
         inputRef.current.focus();
       });
     }
+  }
+
+  function onEmojiClick(emojiData) {
+    const newMessage = inputMessage + emojiData.emoji;
+    form.setFieldsValue({ message: newMessage });
+    setInputMessage(newMessage);
+    setShowPicker(false);
   }
 
   const condition = useMemo(() => {
@@ -189,7 +198,22 @@ export default function ChatWindow() {
                   autoComplete="off"
                 />
               </Form.Item>
-              <Button type="primary" onClick={handleOnSubmit}>
+              <img
+                className="emoji-icon"
+                src="https://icons.getbootstrap.com/assets/icons/emoji-smile.svg"
+                onClick={() => setShowPicker((val) => !val)}
+              />
+              {showPicker && (
+                <div
+                  style={{ position: "absolute", bottom: "50px", right: "0" }}
+                >
+                  <Picker
+                    pickerStyle={{ width: "300px" }}
+                    onEmojiClick={onEmojiClick}
+                  />
+                </div>
+              )}
+              <Button type="primary" onClick={handleOnSubmit} style={{ marginLeft: 10 }}>
                 Send
               </Button>
             </FormStyled>
