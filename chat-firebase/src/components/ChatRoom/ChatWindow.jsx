@@ -5,7 +5,7 @@ import { addDocument } from "@/firebase/service";
 import useFirestore from "@/hooks/useFireStore";
 import { UserAddOutlined } from "@ant-design/icons";
 import { Alert, Avatar, Button, Form, Input, Tooltip } from "antd";
-import React, { useContext, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import Background from "@/assets/bg-chat.png";
 const HeaderStyled = styled.div`
@@ -127,6 +127,13 @@ export default function ChatWindow() {
   }, [selectedRoomId]);
 
   const messages = useFirestore("messages", condition);
+
+  useEffect(() => {
+    if (messageListRef?.current) {
+      messageListRef.current.scrollTop =
+        messageListRef.current.scrollHeight + 50;
+    }
+  }, [messages]);
   return (
     <WrapperStyled>
       {selectedRoom.id ? (
