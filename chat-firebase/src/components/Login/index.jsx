@@ -1,11 +1,11 @@
-import { Row, Col, Typography, Button } from "antd";
+import { Row, Col, Typography, Button, Tooltip } from "antd";
 import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
 import { auth, db } from "@/firebase/config";
 import {
   FacebookAuthProvider,
   signInWithPopup,
   getAdditionalUserInfo,
-  GoogleAuthProvider
+  GoogleAuthProvider,
 } from "firebase/auth";
 import { addDocument, generateKeywords } from "@/firebase/service";
 import BgChat from "@/assets/bg-chat.png";
@@ -39,10 +39,9 @@ function Login() {
   }
   async function handleLoginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(async (result) => {
-        const res = await addUserToDB(result);
-      })
+    signInWithPopup(auth, provider).then(async (result) => {
+      const res = await addUserToDB(result);
+    });
   }
   return (
     <div
@@ -66,14 +65,15 @@ function Login() {
         <Row justify="center" gutter={[16, 16]}>
           <Col span={10}>
             {" "}
-            <img
-              src={Logo}
-              alt="App Logo"
-              style={{ width: "100px" }}
-            />
+            <img src={Logo} alt="App Logo" style={{ width: "100px" }} />
           </Col>
           <Col span={14}>
-            <Row justify="space-between" align="middle" gutter={[16, 16]} style={{ height: '100%', alignItems: 'flex-start' }}>
+            <Row
+              justify="space-between"
+              align="middle"
+              gutter={[16, 16]}
+              style={{ height: "100%", alignItems: "flex-start" }}
+            >
               <Col span={24}>
                 <Button
                   type="primary"
@@ -85,14 +85,17 @@ function Login() {
                 </Button>
               </Col>
               <Col span={24}>
-                <Button
-                  type="primary"
-                  icon={<FacebookOutlined />}
-                  onClick={handleLoginWithFacebook}
-                  style={{ width: "100%" }}
-                >
-                  Login with Facebook
-                </Button>
+                <Tooltip trigger="hover" placement="bottom" title="The feature is under maintenance due to the absence of a Facebook app.">
+                  <Button
+                    disabled
+                    type="primary"
+                    icon={<FacebookOutlined />}
+                    onClick={handleLoginWithFacebook}
+                    style={{ width: "100%" }}
+                  >
+                    Login with Facebook
+                  </Button>
+                </Tooltip>
               </Col>
             </Row>
           </Col>
