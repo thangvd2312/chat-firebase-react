@@ -41,8 +41,20 @@ const ButtonGroupStyled = styled.div`
 
 const WrapperStyled = styled.div`
   height: 100vh;
-  background-image: url(${Background});
-  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url(${Background});
+    background-size: cover;
+    filter: blur(5px); // Adjust the blur value as needed
+    z-index: -1;
+  }
 `;
 
 const ContentStyled = styled.div`

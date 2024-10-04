@@ -14,7 +14,6 @@ const WrapperStyled = styled.div`
   .date {
     margin-left: 10px;
     font-size: 11px;
-    color: #a7a7a7;
   }
 
   .content {
