@@ -1,6 +1,9 @@
-import { useHistory } from "react-router-dom";
 import { auth } from "@/firebase/config";
+
+import { useHistory } from "react-router-dom";
+
 import { createContext, useEffect, useState } from "react";
+
 import { Spin } from "antd";
 
 export const AuthContext = createContext();

@@ -41,7 +41,7 @@ export default function UserInfo() {
         <Typography.Text className="username">{displayName}</Typography.Text>
       </div>
       <Button ghost onClick={handleLogout}>
-        Đăng xuất
+        Logout
       </Button>
     </WrapperStyled>
   );

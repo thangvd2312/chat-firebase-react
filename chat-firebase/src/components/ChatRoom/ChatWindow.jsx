@@ -1,8 +1,13 @@
 import Message from "@/components/ChatRoom/Message";
+import { AppContext } from "@/context/AppProvider";
+import { AuthContext } from "@/context/AuthProvider";
+import { addDocument } from "@/firebase/service";
+import useFirestore from "@/hooks/useFireStore";
 import { UserAddOutlined } from "@ant-design/icons";
-import { Avatar, Button, Form, Input, Tooltip } from "antd";
-import React, { useRef } from "react";
+import { Alert, Avatar, Button, Form, Input, Tooltip } from "antd";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import Background from "@/assets/bg-chat.png";
 const HeaderStyled = styled.div`
   display: flex;
   justify-content: space-between;
@@ -36,6 +41,8 @@ const ButtonGroupStyled = styled.div`
 
 const WrapperStyled = styled.div`
   height: 100vh;
+  background-image: url(${Background});
+  background-size: cover;
 `;
 
 const ContentStyled = styled.div`
@@ -65,170 +72,113 @@ const MessageListStyled = styled.div`
   overflow-y: auto;
 `;
 export default function ChatWindow() {
+  const {
+    user: { uid, photoURL, displayName },
+  } = useContext(AuthContext);
+  const {
+    rooms,
+    selectedRoom,
+    selectedRoomId,
+    members,
+    setIsInviteMemberVisible,
+  } = useContext(AppContext);
   const [form] = Form.useForm();
+  const [inputMessage, setInputMessage] = useState("");
   const inputRef = useRef(null);
   const messageListRef = useRef(null);
   function handleInputChange(e) {
-    console.log(e.target.value);
+    setInputMessage(e.target.value);
   }
-  function handleOnSubmit() {}
+  function handleOnSubmit() {
+    addDocument("messages", {
+      text: inputMessage,
+      uid,
+      photoURL,
+      displayName,
+      roomId: selectedRoomId,
+    });
+    form.resetFields(["message"]);
+  }
+
+  const condition = useMemo(() => {
+    return {
+      fieldName: "roomId",
+      operator: "==",
+      compareValue: selectedRoomId,
+    };
+  }, [selectedRoomId]);
+
+  const messages = useFirestore("messages", condition);
   return (
     <WrapperStyled>
-      <HeaderStyled>
-        <div className="header__info">
-          <p className="header__title">Room 1</p>
-          <span className="header__description">Đây là room 1</span>
-        </div>
-        <ButtonGroupStyled>
-          <Button icon={<UserAddOutlined />} type="text">
-            Mời
-          </Button>
-          <Avatar.Group size="small" max={{ count: 2 }}>
-            <Tooltip title="User 1">
-              <Avatar>User 1</Avatar>
-            </Tooltip>
-            <Tooltip title="User 2">
-              <Avatar>User 2</Avatar>
-            </Tooltip>
-            <Tooltip title="User 3">
-              <Avatar>User 3</Avatar>
-            </Tooltip>
-            <Tooltip title="User 4">
-              <Avatar>User 4</Avatar>
-            </Tooltip>
-          </Avatar.Group>
-        </ButtonGroupStyled>
-      </HeaderStyled>
-      <ContentStyled>
-        <MessageListStyled ref={messageListRef}>
-          {/* {messages.map((mes) => (
-            <Message
-              key={mes.id}
-              text={mes.text}
-              photoURL={mes.photoURL}
-              displayName={mes.displayName}
-              createdAt={mes.createdAt}
-            />
-          ))} */}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />{" "}
-          <Message
-            text={"Test"}
-            photoURL={null}
-            displayName={"Thang"}
-            createdAt={1727858586}
-          />
-        </MessageListStyled>
-        <FormStyled form={form}>
-          <Form.Item name="message">
-            <Input
-              ref={inputRef}
-              onChange={handleInputChange}
-              onPressEnter={handleOnSubmit}
-              placeholder="Nhập tin nhắn..."
-              variant="borderless"
-              autoComplete="off"
-            />
-          </Form.Item>
-          <Button type="primary" onClick={handleOnSubmit}>
-            Gửi
-          </Button>
-        </FormStyled>
-      </ContentStyled>
+      {selectedRoom.id ? (
+        <>
+          <HeaderStyled>
+            <div className="header__info">
+              <p className="header__title">{selectedRoom.name}</p>
+              <span className="header__description">
+                {selectedRoom.description}
+              </span>
+            </div>
+            <ButtonGroupStyled>
+              <Button
+                icon={<UserAddOutlined />}
+                type="text"
+                onClick={() => setIsInviteMemberVisible(true)}
+              >
+                Mời
+              </Button>
+              <Avatar.Group size="small" max={{ count: 2 }}>
+                {members.map((member) => (
+                  <Tooltip title={member.displayName} key={member.id}>
+                    <Avatar src={member.photoURL}>
+                      {member.photoURL
+                        ? ""
+                        : member.displayName?.charAt(0)?.toUpperCase()}
+                    </Avatar>
+                  </Tooltip>
+                ))}
+              </Avatar.Group>
+            </ButtonGroupStyled>
+          </HeaderStyled>
+          <ContentStyled>
+            <MessageListStyled ref={messageListRef}>
+              {messages.map((mes) => (
+                <Message
+                  key={mes.id}
+                  text={mes.text}
+                  photoURL={mes.photoURL}
+                  displayName={mes.displayName}
+                  createdAt={mes.createdAt}
+                />
+              ))}
+            </MessageListStyled>
+            <FormStyled form={form}>
+              <Form.Item name="message">
+                <Input
+                  ref={inputRef}
+                  onChange={handleInputChange}
+                  onPressEnter={handleOnSubmit}
+                  placeholder="Typing message..."
+                  variant="borderless"
+                  autoComplete="off"
+                />
+              </Form.Item>
+              <Button type="primary" onClick={handleOnSubmit}>
+                Send
+              </Button>
+            </FormStyled>
+          </ContentStyled>
+        </>
+      ) : (
+        <Alert
+          message="Choose a room"
+          type="info"
+          showIcon
+          style={{ margin: 5 }}
+          closable
+        />
+      )}
     </WrapperStyled>
   );
 }

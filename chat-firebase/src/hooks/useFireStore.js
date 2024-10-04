@@ -12,7 +12,7 @@ const useFirestore = (collectionName, condition) => {
     // k thì nó sẽ die, vì k thực hiện được query
     let collectionRef = query(
       collection(db, collectionName), 
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt')
     );
 
     if (condition) {
