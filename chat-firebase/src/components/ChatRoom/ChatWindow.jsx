@@ -110,6 +110,12 @@ export default function ChatWindow() {
       roomId: selectedRoomId,
     });
     form.resetFields(["message"]);
+
+    if (inputRef?.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+      });
+    }
   }
 
   const condition = useMemo(() => {
