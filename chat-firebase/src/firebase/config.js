@@ -19,9 +19,8 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-console.log(window.location.hostname);
 if (window.location.hostname === "localhost") {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, "localhost", 8080);
 }
 export { app, analytics, auth, db };

@@ -16,7 +16,6 @@ export default function AddRoomModal() {
       alert("Room exists");
       return;
     }
-    console.log({ ...form.getFieldsValue(), members: [uid] });
     addDocument('rooms', { ...form.getFieldsValue(), members: [uid] });
 
     // reset form value
