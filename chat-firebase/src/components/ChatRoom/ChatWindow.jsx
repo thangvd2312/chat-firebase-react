@@ -100,7 +100,7 @@ export default function ChatWindow() {
     setInputMessage(e.target.value);
   }
   function handleOnSubmit() {
-    if (!inputMessage.length) return;
+    if (!inputMessage.trim().length) return;
     addDocument("messages", {
       text: inputMessage,
       uid,
