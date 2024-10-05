@@ -30,13 +30,16 @@ const LinkStyled = styled(Typography.Link)`
   margin-bottom: 5px;
   color: white;
 `;  
-export default function RoomList() {
+export default function RoomList({ setIsSidebarOpen }) {
   const { setIsAddRoomVisible, rooms, setSelectedRoomId } = useContext(AppContext);
   return (
     <Collapse ghost defaultActiveKey={["1"]}>
       <PanelStyled header="All rooms" key="1">
         {rooms.map((room) => (
-          <LinkStyled key={room.id} onClick={() => setSelectedRoomId(room.id)}>{room.name}</LinkStyled>
+          <LinkStyled key={room.id} onClick={() => {
+            setSelectedRoomId(room.id);
+            setIsSidebarOpen(false);
+          }} active={room.id === setSelectedRoomId}>{room.name}</LinkStyled>
         ))}
         <Button type="text" icon={<PlusSquareOutlined />} className="add-room" onClick={() => setIsAddRoomVisible(true)}>
           Add room

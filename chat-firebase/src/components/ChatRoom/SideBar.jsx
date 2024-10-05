@@ -12,7 +12,7 @@ const SidebarStyled = styled.div`
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 `;
 
-export default function Sidebar() {
+export default function Sidebar({ setIsSidebarOpen }) {
   return (
     <SidebarStyled>
       <Row>
@@ -20,7 +20,7 @@ export default function Sidebar() {
           <UserInfo />
         </Col>
         <Col span={24}>
-          <RoomList />
+          <RoomList setIsSidebarOpen={setIsSidebarOpen} />
         </Col>
       </Row>
     </SidebarStyled>
