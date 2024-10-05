@@ -4,11 +4,12 @@ import { AuthContext } from "@/context/AuthProvider";
 import { addDocument } from "@/firebase/service";
 import useFirestore from "@/hooks/useFireStore";
 import { UserAddOutlined } from "@ant-design/icons";
-import { Alert, Avatar, Button, Form, Input, Tooltip } from "antd";
+import { Alert, Avatar, Button, Input, Tooltip } from "antd";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
 import Background from "@/assets/bg-chat.png";
+import EmojiIcon from "@/assets/smiley-icon.svg";
 const HeaderStyled = styled.div`
   display: flex;
   justify-content: space-between;
@@ -40,6 +41,7 @@ const ButtonGroupStyled = styled.div`
   align-items: center;
 `;
 
+
 const WrapperStyled = styled.div`
   height: 100vh;
   position: relative;
@@ -66,18 +68,13 @@ const ContentStyled = styled.div`
   justify-content: flex-end;
 `;
 
-const FormStyled = styled(Form)`
+const FormStyled = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 2px 2px 2px 0;
   border: 1px solid rgb(230, 230, 230);
   border-radius: 2px;
-
-  .ant-form-item {
-    flex: 1;
-    margin-bottom: 0;
-  }
 `;
 
 const MessageListStyled = styled.div`
@@ -95,7 +92,6 @@ export default function ChatWindow() {
     members,
     setIsInviteMemberVisible,
   } = useContext(AppContext);
-  const [form] = Form.useForm();
   const [inputMessage, setInputMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const inputRef = useRef(null);
@@ -104,6 +100,7 @@ export default function ChatWindow() {
     setInputMessage(e.target.value);
   }
   function handleOnSubmit() {
+    if (!inputMessage.length) return;
     addDocument("messages", {
       text: inputMessage,
       uid,
@@ -111,7 +108,7 @@ export default function ChatWindow() {
       displayName,
       roomId: selectedRoomId,
     });
-    form.resetFields(["message"]);
+    setInputMessage("");
 
     if (inputRef?.current) {
       setTimeout(() => {
@@ -122,7 +119,6 @@ export default function ChatWindow() {
 
   function onEmojiClick(emojiData) {
     const newMessage = inputMessage + emojiData.emoji;
-    form.setFieldsValue({ message: newMessage });
     setInputMessage(newMessage);
     setShowPicker(false);
   }
@@ -187,20 +183,20 @@ export default function ChatWindow() {
                 />
               ))}
             </MessageListStyled>
-            <FormStyled form={form}>
-              <Form.Item name="message">
-                <Input
-                  ref={inputRef}
-                  onChange={handleInputChange}
-                  onPressEnter={handleOnSubmit}
-                  placeholder="Typing message..."
-                  variant="borderless"
-                  autoComplete="off"
-                />
-              </Form.Item>
+            <FormStyled>
+              <Input
+                ref={inputRef}
+                onChange={handleInputChange}
+                onPressEnter={handleOnSubmit}
+                placeholder="Typing message..."
+                variant="borderless"
+                autoComplete="off"
+                value={inputMessage}
+              />
               <img
                 className="emoji-icon"
-                src="https://icons.getbootstrap.com/assets/icons/emoji-smile.svg"
+                src={EmojiIcon}
+                width={20}
                 onClick={() => setShowPicker((val) => !val)}
               />
               {showPicker && (
@@ -213,7 +209,11 @@ export default function ChatWindow() {
                   />
                 </div>
               )}
-              <Button type="primary" onClick={handleOnSubmit} style={{ marginLeft: 10 }}>
+              <Button
+                type="primary"
+                onClick={handleOnSubmit}
+                style={{ marginLeft: 10 }}
+              >
                 Send
               </Button>
             </FormStyled>
