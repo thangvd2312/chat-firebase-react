@@ -26,22 +26,40 @@ const PanelStyled = styled(Panel)`
 `;
 
 const LinkStyled = styled(Typography.Link)`
-  display: block;
-  margin-bottom: 5px;
-  color: white;
-`;  
+  &&& {
+    display: block;
+    margin-bottom: 5px;
+    color: white;
+    background-color: ${({ active }) => (active ? "white" : "transparent")};
+    color: ${({ active }) => (active ? "black" : "white")};
+    padding: 5px;
+    border-radius: 4px;
+  }
+`;
 export default function RoomList({ setIsSidebarOpen }) {
-  const { setIsAddRoomVisible, rooms, setSelectedRoomId } = useContext(AppContext);
+  const { setIsAddRoomVisible, rooms, selectedRoomId, setSelectedRoomId } =
+    useContext(AppContext);
   return (
     <Collapse ghost defaultActiveKey={["1"]}>
       <PanelStyled header="All rooms" key="1">
         {rooms.map((room) => (
-          <LinkStyled key={room.id} onClick={() => {
-            setSelectedRoomId(room.id);
-            setIsSidebarOpen(false);
-          }} active={room.id === setSelectedRoomId}>{room.name}</LinkStyled>
+          <LinkStyled
+            key={room.id}
+            onClick={() => {
+              setSelectedRoomId(room.id);
+              setIsSidebarOpen(false);
+            }}
+            active={room.id === selectedRoomId ? true : false}
+          >
+            {room.name}
+          </LinkStyled>
         ))}
-        <Button type="text" icon={<PlusSquareOutlined />} className="add-room" onClick={() => setIsAddRoomVisible(true)}>
+        <Button
+          type="text"
+          icon={<PlusSquareOutlined />}
+          className="add-room"
+          onClick={() => setIsAddRoomVisible(true)}
+        >
           Add room
         </Button>
       </PanelStyled>

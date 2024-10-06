@@ -29,12 +29,20 @@ const SidebarWrapper = styled.div`
   }
 `;
 
+const ToggleButtonStyled = styled(ToggleButton)`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
 function ChatRoom() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <Row>
-      <ToggleButton
+      <ToggleButtonStyled
         icon={isSidebarOpen ? <RightOutlined /> : <LeftOutlined />}
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         isOpen={isSidebarOpen}
