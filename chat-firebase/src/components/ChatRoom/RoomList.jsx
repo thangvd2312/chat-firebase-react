@@ -30,8 +30,8 @@ const LinkStyled = styled(Typography.Link)`
     display: block;
     margin-bottom: 5px;
     color: white;
-    background-color: ${({ active }) => (active ? "white" : "transparent")};
-    color: ${({ active }) => (active ? "black" : "white")};
+    background-color: ${({ active }) => (active === "true" ? "white" : "transparent")};
+    color: ${({ active }) => (active === "true" ? "black" : "white")};
     padding: 5px;
     border-radius: 4px;
   }
@@ -49,7 +49,7 @@ export default function RoomList({ setIsSidebarOpen }) {
               setSelectedRoomId(room.id);
               setIsSidebarOpen(false);
             }}
-            active={room.id === selectedRoomId ? true : false}
+            active={(room.id === selectedRoomId).toString()}
           >
             {room.name}
           </LinkStyled>

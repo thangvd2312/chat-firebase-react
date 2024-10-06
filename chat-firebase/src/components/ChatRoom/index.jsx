@@ -8,7 +8,7 @@ import styled from "styled-components";
 const ToggleButton = styled(Button)`
   position: fixed;
   top: 50%;
-  left: ${(props) => (props.isOpen ? "0" : "calc(100% - 30px)")};
+  left: ${(props) => (props.isopen === "true" ? "0" : "calc(100% - 30px)")};
   transform: translateY(-50%);
   z-index: 1100;
   width: 30px;
@@ -25,7 +25,7 @@ const ToggleButton = styled(Button)`
 
 const SidebarWrapper = styled.div`
   @media (max-width: 768px) {
-    display: ${(props) => (props.isOpen ? "block" : "none")};
+    display: ${(props) => (props.isopen === "true" ? "block" : "none")};
   }
 `;
 
@@ -45,10 +45,10 @@ function ChatRoom() {
       <ToggleButtonStyled
         icon={isSidebarOpen ? <RightOutlined /> : <LeftOutlined />}
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        isOpen={isSidebarOpen}
+        isopen={isSidebarOpen.toString()}
       />
       <Col xs={24} sm={8} md={6} lg={6} xl={6}>
-        <SidebarWrapper isOpen={isSidebarOpen}>
+        <SidebarWrapper isopen={isSidebarOpen.toString()}>
           <SideBar setIsSidebarOpen={setIsSidebarOpen} />
         </SidebarWrapper>
       </Col>
