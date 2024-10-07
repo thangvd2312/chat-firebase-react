@@ -16,8 +16,9 @@ function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
+        const { providerId } = user.providerData.find(elm => elm.email === user.email);
         const { displayName, email, uid, photoURL } = user;
-        setUser({ displayName, email, uid, photoURL });
+        setUser({ displayName, email, uid, photoURL, providerId });
         setIsLoading(false);
         history.push("/");
         return;

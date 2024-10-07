@@ -10,6 +10,7 @@ import {
 import { addDocument, generateKeywords } from "@/firebase/service";
 import BgChat from "@/assets/bg-chat.png";
 import Logo from "@/assets/logo.png";
+import { collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 const { Title } = Typography;
 function Login() {
   async function addUserToDB(result) {
@@ -22,9 +23,20 @@ function Login() {
         uid: result.user.uid,
         providerId: additionalUserInfo.providerId,
         keywords: generateKeywords(result.user.displayName),
+        isLoggedIn: true,
+        lastLogin: Date.now(),
       };
       const uid = await addDocument("users", data);
       console.log("new user: ", uid);
+    } else {
+      const userQuery = query(collection(db, "users"), where("uid", "==", result.user.uid), where("providerId", "==", additionalUserInfo.providerId));
+      const querySnapshot = await getDocs(userQuery);
+      querySnapshot.forEach(async (doc) => {
+        await updateDoc(doc.ref, {
+          isLoggedIn: true,
+          lastLogin: Date.now(),
+        });
+      });
     }
   }
   async function handleLoginWithFacebook() {
@@ -41,6 +53,8 @@ function Login() {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider).then(async (result) => {
       const res = await addUserToDB(result);
+    }).catch((error) => {
+      console.log(error);
     });
   }
   return (

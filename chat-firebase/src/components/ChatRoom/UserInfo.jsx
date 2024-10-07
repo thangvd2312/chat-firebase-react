@@ -1,8 +1,9 @@
+import { AppContext } from "@/context/AppProvider";
 import { AuthContext } from "@/context/AuthProvider";
 import { auth, db } from "@/firebase/config";
 import { Avatar, Button, Typography } from "antd";
 import { signOut } from "firebase/auth";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, deleteField, doc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 const WrapperStyled = styled.div`
@@ -18,20 +19,22 @@ const WrapperStyled = styled.div`
 `;
 export default function UserInfo() {
   const {
-    user: { displayName, photoURL },
+    user: { displayName, photoURL, uid, providerId, members },
   } = useContext(AuthContext);
-  function handleLogout() {
-    signOut(auth);
+  const { clearState } = useContext(AppContext);
+  async function handleLogout() {
+    const userQuery = query(collection(db, "users"), where("uid", "==", uid), where("providerId", "==", providerId));
+    const querySnapshot = await getDocs(userQuery);
+    querySnapshot.forEach(async (doc) => {
+      await updateDoc(doc.ref, {
+        isLoggedIn: false,
+        lastLogin: deleteField(),
+      });
+      await signOut(auth);
+    });
+    
   }
 
-  useEffect(() => {
-    onSnapshot(collection(db, "users"), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-    });
-  }, []);
   return (
     <WrapperStyled>
       <div>
@@ -40,7 +43,10 @@ export default function UserInfo() {
         </Avatar>
         <Typography.Text className="username">{displayName}</Typography.Text>
       </div>
-      <Button ghost onClick={handleLogout}>
+      <Button ghost onClick={() => {
+        handleLogout();
+        clearState();
+      }}>
         Logout
       </Button>
     </WrapperStyled>

@@ -1,10 +1,9 @@
-import React, { useContext, useMemo } from "react";
-import { Button, Collapse, Typography } from "antd";
+import React, { useContext } from "react";
+import { Button, Collapse, Typography, Badge } from "antd";
 import { PlusSquareOutlined } from "@ant-design/icons";
-import { AuthContext } from "@/context/AuthProvider";
 import { AppContext } from "@/context/AppProvider";
-import useFireStore from "@/hooks/useFireStore";
 import styled from "styled-components";
+import { AuthContext } from "@/context/AuthProvider";
 const { Panel } = Collapse;
 
 const PanelStyled = styled(Panel)`
@@ -30,17 +29,46 @@ const LinkStyled = styled(Typography.Link)`
     display: block;
     margin-bottom: 5px;
     color: white;
-    background-color: ${({ active }) => (active === "true" ? "white" : "transparent")};
+    background-color: ${({ active }) =>
+      active === "true" ? "white" : "transparent"};
     color: ${({ active }) => (active === "true" ? "black" : "white")};
     padding: 5px;
     border-radius: 4px;
   }
 `;
+
+const UserContainer = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-bottom: 5px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+`;
+
+const UserName = styled(Typography.Text)`
+  color: white;
+  margin-left: 8px;
+`;
+
 export default function RoomList({ setIsSidebarOpen }) {
-  const { setIsAddRoomVisible, rooms, selectedRoomId, setSelectedRoomId } =
-    useContext(AppContext);
+  const {
+    setIsAddRoomVisible,
+    rooms,
+    selectedRoomId,
+    setSelectedRoomId,
+    members,
+    selectedRoom,
+  } = useContext(AppContext);
+  const { user } = useContext(AuthContext);
+  console.log(user);
   return (
-    <Collapse ghost defaultActiveKey={["1"]}>
+    <Collapse ghost defaultActiveKey={["1", "2"]}>
       <PanelStyled header="All rooms" key="1">
         {rooms.map((room) => (
           <LinkStyled
@@ -63,6 +91,27 @@ export default function RoomList({ setIsSidebarOpen }) {
           Add room
         </Button>
       </PanelStyled>
+
+      { selectedRoomId &&
+        <PanelStyled
+          header={
+            <>
+              Friend in room: <strong>{selectedRoom?.name}</strong>
+            </>
+          }
+          key="2"
+        >
+          {members.map((elm) => (
+            <UserContainer key={user.id}>
+              <Badge color={elm.isLoggedIn ? "green" : "gray"} dot />
+              <UserName>
+                {elm.displayName}{" "}
+                <span>{elm.uid === user.uid ? "(You)" : ""}</span>
+              </UserName>
+            </UserContainer>
+          ))}
+        </PanelStyled>
+      }
     </Collapse>
   );
 }
