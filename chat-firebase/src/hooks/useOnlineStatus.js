@@ -72,6 +72,7 @@ const useOnlineStatus = () => {
       updateFirestoreLastSeen();
 
       function handleUserActivity() {
+        updateFirestoreLastSeen();
         set(statusRef, { isOnline: true });
       }
 
@@ -83,12 +84,14 @@ const useOnlineStatus = () => {
         localStorage.setItem("activeSessions", JSON.stringify(updatedSessions));
 
         if (updatedSessions.length === 0) {
+          updateFirestoreLastSeen();
           set(statusRef, { isOnline: false });
         }
       }
 
       function handleBlur() {
         if (!areOtherTabsOpen()) {
+          updateFirestoreLastSeen();
           set(statusRef, { isOnline: false });
         }
       }
