@@ -72,7 +72,6 @@ const useOnlineStatus = () => {
       updateFirestoreLastSeen();
 
       function handleUserActivity() {
-        updateFirestoreLastSeen();
         set(statusRef, { isOnline: true });
       }
 
