@@ -3,7 +3,6 @@ import { AuthContext } from "@/context/AuthProvider";
 import { auth, db } from "@/firebase/config";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
 import { Avatar, Button, Typography } from "antd";
-import axios from "axios";
 import { signOut } from "firebase/auth";
 import {
   collection,
