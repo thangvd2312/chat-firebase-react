@@ -5,6 +5,7 @@ import { AppContext } from "@/context/AppProvider";
 import styled from "styled-components";
 import { AuthContext } from "@/context/AuthProvider";
 import { getDatabase, onValue, ref } from "firebase/database";
+import moment from "moment";
 const { Panel } = Collapse;
 
 const PanelStyled = styled(Panel)`
@@ -68,7 +69,7 @@ export default function RoomList({ setIsSidebarOpen }) {
   } = useContext(AppContext);
   const { user } = useContext(AuthContext);
   const [userStatuses, setUserStatuses] = useState({});
-
+  console.log(members);
   useEffect(() => {
     const db = getDatabase();
 
@@ -116,7 +117,7 @@ export default function RoomList({ setIsSidebarOpen }) {
           key="2"
         >
           {members.map((elm) => (
-            <UserContainer key={user.id}>
+            <UserContainer key={elm.uid}>
               <Badge
                 color={userStatuses[elm.uid]?.isOnline ? "green" : "gray"}
                 dot
@@ -124,6 +125,14 @@ export default function RoomList({ setIsSidebarOpen }) {
               <UserName>
                 {elm.displayName}{" "}
                 <span>{elm.uid === user.uid ? "(You)" : ""}</span>
+                {!userStatuses[elm.uid]?.isOnline &&
+                  elm?.lastSeen && (
+                    <span>
+                      {" "}
+                      - Last seen:{" "}
+                      {moment(new Date(elm.lastSeen.seconds * 1000)).fromNow()}
+                    </span>
+                  )}
               </UserName>
             </UserContainer>
           ))}
