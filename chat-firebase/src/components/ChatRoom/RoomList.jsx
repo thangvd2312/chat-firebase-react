@@ -1,9 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Collapse, Typography, Badge } from "antd";
 import { PlusSquareOutlined } from "@ant-design/icons";
 import { AppContext } from "@/context/AppProvider";
 import styled from "styled-components";
 import { AuthContext } from "@/context/AuthProvider";
+import { getDatabase, onValue, ref } from "firebase/database";
 const { Panel } = Collapse;
 
 const PanelStyled = styled(Panel)`
@@ -66,7 +67,20 @@ export default function RoomList({ setIsSidebarOpen }) {
     selectedRoom,
   } = useContext(AppContext);
   const { user } = useContext(AuthContext);
-  console.log(user);
+  const [userStatuses, setUserStatuses] = useState({});
+
+  useEffect(() => {
+    const db = getDatabase();
+
+    const statusRef = ref(db, "status");
+
+    const unsubscribe = onValue(statusRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setUserStatuses(snapshot.val());
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   return (
     <Collapse ghost defaultActiveKey={["1", "2"]}>
       <PanelStyled header="All rooms" key="1">
@@ -92,7 +106,7 @@ export default function RoomList({ setIsSidebarOpen }) {
         </Button>
       </PanelStyled>
 
-      { selectedRoomId &&
+      {selectedRoomId && (
         <PanelStyled
           header={
             <>
@@ -103,7 +117,10 @@ export default function RoomList({ setIsSidebarOpen }) {
         >
           {members.map((elm) => (
             <UserContainer key={user.id}>
-              <Badge color={elm.isLoggedIn ? "green" : "gray"} dot />
+              <Badge
+                color={userStatuses[elm.uid]?.isOnline ? "green" : "gray"}
+                dot
+              />
               <UserName>
                 {elm.displayName}{" "}
                 <span>{elm.uid === user.uid ? "(You)" : ""}</span>
@@ -111,7 +128,7 @@ export default function RoomList({ setIsSidebarOpen }) {
             </UserContainer>
           ))}
         </PanelStyled>
-      }
+      )}
     </Collapse>
   );
 }

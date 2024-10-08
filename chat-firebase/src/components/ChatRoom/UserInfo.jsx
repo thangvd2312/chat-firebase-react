@@ -1,9 +1,20 @@
 import { AppContext } from "@/context/AppProvider";
 import { AuthContext } from "@/context/AuthProvider";
 import { auth, db } from "@/firebase/config";
+import useOnlineStatus from "@/hooks/useOnlineStatus";
 import { Avatar, Button, Typography } from "antd";
+import axios from "axios";
 import { signOut } from "firebase/auth";
-import { collection, deleteField, doc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  deleteField,
+  doc,
+  getDocs,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 const WrapperStyled = styled.div`
@@ -22,9 +33,19 @@ export default function UserInfo() {
     user: { displayName, photoURL, uid, providerId, members },
   } = useContext(AuthContext);
   const { clearState } = useContext(AppContext);
-  async function handleLogout() {
-    const userQuery = query(collection(db, "users"), where("uid", "==", uid), where("providerId", "==", providerId));
+  useOnlineStatus();
+  async function findUserByUidAndProviderId(uid, providerId) {
+    const userQuery = query(
+      collection(db, "users"),
+      where("uid", "==", uid),
+      where("providerId", "==", providerId)
+    );
     const querySnapshot = await getDocs(userQuery);
+    return querySnapshot;
+  }
+
+  async function handleLogout() {
+    const querySnapshot = await findUserByUidAndProviderId(uid, providerId);
     querySnapshot.forEach(async (doc) => {
       await updateDoc(doc.ref, {
         isLoggedIn: false,
@@ -32,7 +53,6 @@ export default function UserInfo() {
       });
       await signOut(auth);
     });
-    
   }
 
   return (
@@ -43,10 +63,13 @@ export default function UserInfo() {
         </Avatar>
         <Typography.Text className="username">{displayName}</Typography.Text>
       </div>
-      <Button ghost onClick={() => {
-        handleLogout();
-        clearState();
-      }}>
+      <Button
+        ghost
+        onClick={() => {
+          handleLogout();
+          clearState();
+        }}
+      >
         Logout
       </Button>
     </WrapperStyled>

@@ -41,7 +41,6 @@ const ButtonGroupStyled = styled.div`
   align-items: center;
 `;
 
-
 const WrapperStyled = styled.div`
   height: 100vh;
   position: relative;
@@ -81,6 +80,7 @@ const MessageListStyled = styled.div`
   max-height: 100%;
   overflow-y: auto;
 `;
+
 export default function ChatWindow() {
   const {
     user: { uid, photoURL, displayName },
@@ -158,9 +158,13 @@ export default function ChatWindow() {
               >
                 Mời
               </Button>
-              <Avatar.Group size="small" max={{ count: 2 }}>
+              <Avatar.Group size="small" className="custom-avatar-group" max={{ count: 2 }}>
                 {members.map((member) => (
-                  <Tooltip title={member.displayName} key={member.id}>
+                  <Tooltip
+                    title={member.displayName}
+                    key={member.id}
+                    overlayClassName="custom-tooltip"
+                  >
                     <Avatar src={member.photoURL}>
                       {member.photoURL
                         ? ""

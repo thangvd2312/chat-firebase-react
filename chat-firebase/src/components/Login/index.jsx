@@ -10,7 +10,14 @@ import {
 import { addDocument, generateKeywords } from "@/firebase/service";
 import BgChat from "@/assets/bg-chat.png";
 import Logo from "@/assets/logo.png";
-import { collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 const { Title } = Typography;
 function Login() {
   async function addUserToDB(result) {
@@ -27,9 +34,12 @@ function Login() {
         lastLogin: Date.now(),
       };
       const uid = await addDocument("users", data);
-      console.log("new user: ", uid);
     } else {
-      const userQuery = query(collection(db, "users"), where("uid", "==", result.user.uid), where("providerId", "==", additionalUserInfo.providerId));
+      const userQuery = query(
+        collection(db, "users"),
+        where("uid", "==", result.user.uid),
+        where("providerId", "==", additionalUserInfo.providerId)
+      );
       const querySnapshot = await getDocs(userQuery);
       querySnapshot.forEach(async (doc) => {
         await updateDoc(doc.ref, {
@@ -51,11 +61,13 @@ function Login() {
   }
   async function handleLoginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).then(async (result) => {
-      const res = await addUserToDB(result);
-    }).catch((error) => {
-      console.log(error);
-    });
+    signInWithPopup(auth, provider)
+      .then(async (result) => {
+        const res = await addUserToDB(result);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
   return (
     <div
@@ -99,7 +111,11 @@ function Login() {
                 </Button>
               </Col>
               <Col span={24}>
-                <Tooltip trigger="hover" placement="bottom" title="The feature is under maintenance due to the absence of a Facebook app.">
+                <Tooltip
+                  trigger="hover"
+                  placement="bottom"
+                  title="The feature is under maintenance due to the absence of a Facebook app."
+                >
                   <Button
                     disabled
                     type="primary"

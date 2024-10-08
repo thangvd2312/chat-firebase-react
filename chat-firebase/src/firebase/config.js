@@ -6,6 +6,7 @@ import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: "AIzaSyAPvdd-pY24r5eeV9HZ_av0XJmAJ9HPHWY",
   authDomain: "chat-firebase-3ff5f.firebaseapp.com",
+  databaseURL: "https://chat-firebase-3ff5f-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "chat-firebase-3ff5f",
   storageBucket: "chat-firebase-3ff5f.appspot.com",
   messagingSenderId: "259020206408",
@@ -19,8 +20,8 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-if (window.location.hostname === "localhost") {
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-  connectFirestoreEmulator(db, "localhost", 8080);
-}
+// if (window.location.hostname === "localhost") {
+//   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+//   connectFirestoreEmulator(db, "localhost", 8080);
+// }
 export { app, analytics, auth, db };

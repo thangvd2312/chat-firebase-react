@@ -37,3 +37,7 @@
     transform: rotate(360deg);
   }
 }
+
+.custom-tooltip .ant-tooltip-inner {
+  z-index: 1000;
+}
