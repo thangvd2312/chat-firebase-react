@@ -139,6 +139,24 @@ export default function ChatWindow() {
         messageListRef.current.scrollHeight + 50;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const latestMessage = messages[messages.length - 1];
+      if (Notification.permission === "granted") {
+        new Notification("New Message", {
+          body: `${latestMessage.displayName}: ${latestMessage.text}`,
+          icon: latestMessage.photoURL || latestMessage.displayName?.charAt(0)?.toUpperCase(),
+        });
+      }
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
   return (
     <WrapperStyled>
       {selectedRoom.id ? (
