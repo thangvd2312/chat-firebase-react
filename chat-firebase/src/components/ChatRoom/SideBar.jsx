@@ -1,9 +1,7 @@
 import RoomList from "@/components/ChatRoom/RoomList";
 import UserInfo from "@/components/ChatRoom/UserInfo";
-import React from "react";
 import { Row, Col } from "antd";
 import styled from "styled-components";
-import Background from "@/assets/bg-chat.png";
 const SidebarStyled = styled.div`
   background: #3f0e40;
   color: white;

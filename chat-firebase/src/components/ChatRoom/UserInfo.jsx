@@ -7,14 +7,12 @@ import { signOut } from "firebase/auth";
 import {
   collection,
   deleteField,
-  doc,
   getDocs,
-  onSnapshot,
   query,
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { useContext, useEffect } from "react";
+import { useContext } from "react";
 import styled from "styled-components";
 const WrapperStyled = styled.div`
   display: flex;
@@ -29,7 +27,7 @@ const WrapperStyled = styled.div`
 `;
 export default function UserInfo() {
   const {
-    user: { displayName, photoURL, uid, providerId, members },
+    user: { displayName, photoURL, uid, providerId },
   } = useContext(AuthContext);
   const { clearState } = useContext(AppContext);
   useOnlineStatus();

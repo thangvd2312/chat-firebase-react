@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Collapse, Typography, Badge } from "antd";
 import { PlusSquareOutlined } from "@ant-design/icons";
 import { AppContext } from "@/context/AppProvider";
@@ -69,7 +69,6 @@ export default function RoomList({ setIsSidebarOpen }) {
   } = useContext(AppContext);
   const { user } = useContext(AuthContext);
   const [userStatuses, setUserStatuses] = useState({});
-  console.log(members);
   useEffect(() => {
     const db = getDatabase();
 

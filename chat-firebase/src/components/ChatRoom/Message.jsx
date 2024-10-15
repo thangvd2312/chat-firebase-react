@@ -1,11 +1,9 @@
-import React from 'react';
 import { Avatar, Typography } from 'antd';
 import styled from 'styled-components';
 import { formatRelative } from 'date-fns';
 
 const WrapperStyled = styled.div`
   margin-bottom: 10px;
-
   .author {
     margin-left: 5px;
     font-weight: bold;
@@ -17,7 +15,7 @@ const WrapperStyled = styled.div`
   }
 
   .content {
-    margin-left: 30px;
+    margin-left: 30px;  
   }
 `;
 
@@ -34,11 +32,24 @@ function formatDate(seconds) {
   return formattedDate;
 }
 
-export default function Message({ text, displayName, createdAt, photoURL }) {
+// isOwnMessage cái này chưa dùng thôi, nên mình sẽ không đề cập nhiều
+// cái này là để đánh dấu xem message đó có phải là message của mình hay không
+// nếu là của mình thì nằm bên phải, k phải của mình nằm bên trái
+
+export default function Message({ text, displayName, createdAt, photoURL, type, isOwnMessage }) {
+  function isValidUrl(string) {
+    try {
+      new URL(string);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
   return (
-    <WrapperStyled>
+    <WrapperStyled >
       <div>
-        <Avatar size='small' src={photoURL}>
+        <Avatar size='small' src={photoURL}>  
           {photoURL ? '' : displayName?.charAt(0)?.toUpperCase()}
         </Avatar>
         <Typography.Text className='author'>{displayName}</Typography.Text>
@@ -47,7 +58,11 @@ export default function Message({ text, displayName, createdAt, photoURL }) {
         </Typography.Text>
       </div>
       <div>
-        <Typography.Text className='content'>{text}</Typography.Text>
+        {['sticker', 'gif'].includes(type) || isValidUrl(text) ? (
+          <img src={text} alt="sticker" className='content' style={{ width: '100%', maxWidth: '150px', height: 'auto' }} />
+        ) : (
+          <Typography.Text className='content'>{text}</Typography.Text>
+        )}
       </div>
     </WrapperStyled>
   );

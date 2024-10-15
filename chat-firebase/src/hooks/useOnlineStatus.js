@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { getDatabase, ref, onDisconnect, set } from "firebase/database";
 import {
   getFirestore,
-  doc,
-  setDoc,
   query,
   collection,
   where,

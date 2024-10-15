@@ -1,4 +1,4 @@
-import { Row, Col, Typography, Button, Tooltip } from "antd";
+import { Row, Col, Button, Tooltip } from "antd";
 import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
 import { auth, db } from "@/firebase/config";
 import {
@@ -12,13 +12,11 @@ import BgChat from "@/assets/bg-chat.png";
 import Logo from "@/assets/logo.png";
 import {
   collection,
-  doc,
   getDocs,
   query,
   updateDoc,
   where,
 } from "firebase/firestore";
-const { Title } = Typography;
 function Login() {
   async function addUserToDB(result) {
     const additionalUserInfo = getAdditionalUserInfo(result);
@@ -33,7 +31,7 @@ function Login() {
         isLoggedIn: true,
         lastLogin: Date.now(),
       };
-      const uid = await addDocument("users", data);
+      await addDocument("users", data);
     } else {
       const userQuery = query(
         collection(db, "users"),
@@ -53,7 +51,7 @@ function Login() {
     const provider = new FacebookAuthProvider();
     signInWithPopup(auth, provider)
       .then(async (result) => {
-        const res = await addUserToDB(result);
+        await addUserToDB(result);
       })
       .catch((error) => {
         console.log(error);
@@ -63,7 +61,7 @@ function Login() {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then(async (result) => {
-        const res = await addUserToDB(result);
+        await addUserToDB(result);
       })
       .catch((error) => {
         console.log(error);

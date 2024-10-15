@@ -12,7 +12,6 @@ export const addDocument = async (collectionName, data) => {
 
 export const generateKeywords = (displayName) => {
   const name = displayName.split(' ').filter(Boolean); // Lọc bỏ các chuỗi rỗng
-  const length = name.length;
   let result = [];
   
   // Hàm hoán vị tạo ra các chuỗi sắp xếp khác nhau
