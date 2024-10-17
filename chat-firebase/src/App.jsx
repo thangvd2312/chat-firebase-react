@@ -7,7 +7,10 @@ import AuthProvider from "@/context/AuthProvider";
 import AppProvider from '@/context/AppProvider';
 import AddRoom from '@/components/Modals/AddRoom';
 import AddMemberToRoom from '@/components/Modals/AddMemberToRoom';
+import useBlockDevTools from '@/hooks/useBlockDevTools';
+
 function App() {
+  useBlockDevTools();
   return (
     <BrowserRouter>
       <AuthProvider>
