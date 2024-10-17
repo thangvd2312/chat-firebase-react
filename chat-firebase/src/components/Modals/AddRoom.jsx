@@ -16,6 +16,9 @@ export default function AddRoomModal() {
       alert("Room exists");
       return;
     }
+    if (!form.getFieldValue("description")) {
+      form.setFieldsValue({ description: "No description" });
+    }
     addDocument('rooms', { ...form.getFieldsValue(), members: [uid] });
 
     // reset form value

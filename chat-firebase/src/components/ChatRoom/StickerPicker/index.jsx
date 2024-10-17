@@ -1,16 +1,8 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
-import {
-  DB_NAME,
-  LAST_UPDATE_KEY,
-  STICKER_CACHE_DURATION,
-  STORE_NAME,
-} from "@/constants/app";
-import { openDB } from "idb";
-import { getDownloadURL, listAll, ref } from "firebase/storage";
-import { storage } from "@/firebase/config";
 import axios from "axios";
+import * as cheerio from "cheerio";
 const PopupContainer = styled.div`
   position: absolute;
   bottom: 50px;
@@ -120,6 +112,8 @@ const GifImage = styled.img`
   border-radius: 8px;
 `;
 
+const baseURL = "http://cdn.jerrytsq.asia:8080/stickers/";
+
 const StickerPopup = ({ handleSelectedReactIcon }) => {
   const [activeTab, setActiveTab] = useState("emoji");
   const [stickers, setStickers] = useState([]);
@@ -146,82 +140,7 @@ const StickerPopup = ({ handleSelectedReactIcon }) => {
     });
   }
 
-  async function getDb() {
-    return openDB(DB_NAME, 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-          store.createIndex(LAST_UPDATE_KEY, "last_update");
-        }
-      },
-    });
-  }
 
-  async function shouldUpdateStickers() {
-    const db = await getDb();
-    const lastUpdate = await db.get(STORE_NAME, LAST_UPDATE_KEY);
-
-    if (!lastUpdate) return true;
-
-    const now = Date.now();
-    return now - lastUpdate.timestamp > STICKER_CACHE_DURATION;
-  }
-
-  async function fetchStickersFromFirebase() {
-    const rootRef = ref(storage, "/"); // Thay đổi '/' thành đường dẫn cụ thể nếu cần
-    const result = await listAll(rootRef);
-
-    // Duyệt qua từng thư mục
-    const folderPromises = result.prefixes.map(async (folderRef) => {
-      const folderResult = await listAll(folderRef);
-
-      // Lấy URL cho mỗi tệp trong thư mục
-      const imageUrls = await Promise.all(
-        folderResult.items.map((itemRef) => getDownloadURL(itemRef))
-      );
-
-      return {
-        folderName: folderRef.name,
-        images: imageUrls,
-      };
-    });
-
-    // Chờ tất cả các thư mục được xử lý
-    const allFoldersWithImages = await Promise.all(folderPromises);
-    return allFoldersWithImages;
-  }
-
-  async function cacheStickers(stickerUrls) {
-    const db = await getDb();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-
-    stickerUrls.forEach((url, index) => {
-      store.put({
-        id: `sticker_${index}`,
-        data: url,
-      });
-    });
-
-    store.put({
-      id: LAST_UPDATE_KEY,
-      timestamp: Date.now(),
-    });
-
-    await tx.done;
-  }
-
-  async function loadStickers() {
-    const needUpdate = await shouldUpdateStickers();
-    if (needUpdate) {
-      const stickers = await fetchStickersFromFirebase();
-      await cacheStickers(stickers);
-    }
-
-    const db = await getDb();
-    const stickers = await db.getAll(STORE_NAME);
-    return stickers.filter((sticker) => sticker.id !== LAST_UPDATE_KEY);
-  }
 
   const fetchGifs = async (query, offset) => {
     try {
@@ -255,9 +174,56 @@ const StickerPopup = ({ handleSelectedReactIcon }) => {
     }
   };
 
+  const getImageUrls = async (url) => {
+    const response = await axios.get(url);
+    const html = response.data;
+    const $ = cheerio.load(html);
+    const urls = [];
+
+    // Lấy tất cả các liên kết trong trang
+    $("a").each((_, element) => {
+      const link = $(element).attr("href");
+      if (link) {
+        // Nếu là file ảnh
+        if (link.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+          urls.push(`${url}/${link}`);
+        }
+      }
+    });
+
+    return urls;
+  };
+
+  const getFoldersWithImages = async (url) => {
+    const response = await axios.get(url);
+    const html = response.data;
+    const $ = cheerio.load(html);
+    const folderData = [];
+
+    // Lấy tất cả các liên kết trong trang
+    $("a").each((_, element) => {
+      const link = $(element).attr("href");
+      if (link && !link.includes(".")) {
+        // Kiểm tra nếu là thư mục
+        const folderName = link;
+        const folderUrl = `${url}${folderName}`;
+        const images = getImageUrls(folderUrl); // Lấy ảnh trong thư mục
+
+        folderData.push({ folderName, images });
+      }
+    });
+
+    return Promise.all(
+      folderData.map(async (folder) => ({
+        folderName: folder.folderName,
+        images: await folder.images,
+      }))
+    );
+  };
+
   useEffect(() => {
     const load = async () => {
-      const loadedStickers = await loadStickers();
+      const loadedStickers = await getFoldersWithImages(baseURL);
       setStickers(loadedStickers);
     };
     load();
@@ -303,10 +269,10 @@ const StickerPopup = ({ handleSelectedReactIcon }) => {
           {stickers.map((stickerGroup, index) => (
             <StickerGroup key={index}>
               <StickerGroupName>
-                {stickerGroup.data.folderName}
+                {stickerGroup.folderName.replaceAll("/", "")}
               </StickerGroupName>
               <StickerGrid>
-                {stickerGroup.data.images.map((sticker, idx) => (
+                {stickerGroup.images.map((sticker, idx) => (
                   <Sticker
                     key={idx}
                     src={sticker}

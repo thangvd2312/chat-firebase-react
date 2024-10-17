@@ -1,6 +1,7 @@
 import { Avatar, Typography } from 'antd';
 import styled from 'styled-components';
 import { formatRelative } from 'date-fns';
+import { isValidURL } from '@/util/app';
 
 const WrapperStyled = styled.div`
   margin-bottom: 10px;
@@ -37,15 +38,6 @@ function formatDate(seconds) {
 // nếu là của mình thì nằm bên phải, k phải của mình nằm bên trái
 
 export default function Message({ text, displayName, createdAt, photoURL, type, isOwnMessage }) {
-  function isValidUrl(string) {
-    try {
-      new URL(string);
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  }
   return (
     <WrapperStyled >
       <div>
@@ -58,7 +50,7 @@ export default function Message({ text, displayName, createdAt, photoURL, type, 
         </Typography.Text>
       </div>
       <div>
-        {['sticker', 'gif'].includes(type) || isValidUrl(text) ? (
+        {['sticker', 'gif'].includes(type) || isValidURL(text) ? (
           <img src={text} alt="sticker" className='content' style={{ width: '100%', maxWidth: '150px', height: 'auto' }} />
         ) : (
           <Typography.Text className='content'>{text}</Typography.Text>
