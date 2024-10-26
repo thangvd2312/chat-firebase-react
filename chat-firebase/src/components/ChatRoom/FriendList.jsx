@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  onSnapshot,
 } from "firebase/firestore";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { AuthContext } from "@/context/AuthProvider";
@@ -47,22 +48,21 @@ export default function FriendList() {
   };
 
   useEffect(() => {
-    const fetchFriends = async () => {
-      const db = getFirestore();
-      const userQuery = query(
-        collection(db, "users"),
-        where("uid", "==", user.uid)
-      );
-      const userSnapshot = await getDocs(userQuery);
+    const db = getFirestore();
+    const userQuery = query(
+      collection(db, "users"),
+      where("uid", "==", user.uid)
+    );
 
+    const unsubscribeUser = onSnapshot(userQuery, async (userSnapshot) => {
       if (!userSnapshot.empty) {
         const friendUIDs = userSnapshot.docs[0].data().friends || [];
         const friendsQuery = query(
           collection(db, "users"),
           where("uid", "in", friendUIDs)
         );
-        const friendsSnapshot = await getDocs(friendsQuery);
 
+        const friendsSnapshot = await getDocs(friendsQuery);
         const friendDetails = friendsSnapshot.docs.map((doc) => doc.data());
         setFriends(friendDetails);
 
@@ -77,9 +77,10 @@ export default function FriendList() {
           });
         });
       }
-    };
+    });
 
-    fetchFriends();
+    // Clean up the listener on unmount
+    return () => unsubscribeUser();
   }, [user.uid]);
   return (
     <FriendListContainer>

@@ -102,12 +102,6 @@ export default function ChatWindow() {
     };
   }, [selectedFriend, selectedRoomId, uid]);
   const messages = useFirestore(selectedRoomId ? "messages" : "message_single", condition);
-  const selectedFriendOnlineStatus = useMemo(() => {
-    if (!selectedFriend) return null;
-    const friend = friends.find((f) => f.uid === selectedFriend.uid);
-    return friend ? friend.isOnline : null;
-  }, [selectedFriend, friends]);
-
   useEffect(() => {
     if (messageListRef?.current) {
       messageListRef.current.scrollTop =
@@ -131,10 +125,6 @@ export default function ChatWindow() {
                     }}
                   >
                     <Avatar src={selectedFriend.photoURL} />
-                    <Badge
-                      color={selectedFriendOnlineStatus ? "green" : "gray"}
-                      dot
-                    />
                     {selectedFriend.displayName}
                   </p>
                 </>
