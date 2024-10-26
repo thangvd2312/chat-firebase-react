@@ -4,7 +4,7 @@ import { AuthContext } from "@/context/AuthProvider";
 import { addDocument } from "@/firebase/service";
 import useFirestore from "@/hooks/useFireStore";
 import { UserAddOutlined } from "@ant-design/icons";
-import { Alert, Avatar, Button, Input, Tooltip } from "antd";
+import { Alert, Avatar, Badge, Button, Input, Tooltip } from "antd";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import EmojiIcon from "@/assets/happy-icon.webp";
 import {
@@ -20,10 +20,15 @@ import OutsideClickHandler from "react-outside-click-handler";
 
 export default function ChatWindow() {
   const {
-    user: { uid, photoURL, displayName },
+    user: { uid, photoURL, displayName, friends },
   } = useContext(AuthContext);
-  const { selectedRoom, selectedRoomId, members, setIsInviteMemberVisible } =
-    useContext(AppContext);
+  const {
+    selectedRoom,
+    selectedFriend,
+    selectedRoomId,
+    members,
+    setIsInviteMemberVisible,
+  } = useContext(AppContext);
   const [inputMessage, setInputMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const inputRef = useRef(null);
@@ -33,14 +38,29 @@ export default function ChatWindow() {
   }
   function handleOnSubmit() {
     if (!inputMessage.trim().length) return;
-    addDocument("messages", {
-      text: inputMessage,
-      uid,
-      photoURL,
-      displayName,
-      roomId: selectedRoomId,
-      type: "text",
-    });
+    if (selectedRoomId) {
+      addDocument("messages", {
+        text: inputMessage,
+        uid,
+        photoURL,
+        displayName,
+        roomId: selectedRoomId,
+        type: "text",
+      });
+    }
+
+    if (selectedFriend) {
+      addDocument("message_single", {
+        text: inputMessage,
+        uid,
+        photoURL,
+        displayName,
+        roomId: [uid, selectedFriend.uid].sort((a, b) => a.localeCompare(b)).join('_'),
+        type: "text",
+        createdAt: new Date(),
+      });
+    }
+    
     setInputMessage("");
 
     if (inputRef?.current) {
@@ -58,14 +78,27 @@ export default function ChatWindow() {
       return;
     }
     if (["sticker", "gif"].includes(type)) {
-      addDocument("messages", {
-        text: data,
-        uid,
-        photoURL,
-        displayName,
-        roomId: selectedRoomId,
-        type: "sticker",
-      });
+      if (selectedRoomId) {
+        addDocument("messages", {
+          text: data,
+          uid,
+          photoURL,
+          displayName,
+          roomId: selectedRoomId,
+          type: "sticker",
+        });
+      }
+      if (selectedFriend) {
+        addDocument("message_single", {
+          text: inputMessage,
+          uid,
+          photoURL,
+          displayName,
+          roomId: [uid, selectedFriend.uid].sort((a, b) => a.localeCompare(b)).join('_'),
+          type: "sticker",
+          createdAt: new Date(),
+        });
+      }
       return;
     }
   }
@@ -74,11 +107,15 @@ export default function ChatWindow() {
     return {
       fieldName: "roomId",
       operator: "==",
-      compareValue: selectedRoomId,
+      compareValue: selectedRoomId ? selectedRoomId : [uid, selectedFriend.uid].sort((a, b) => a.localeCompare(b)).join('_'),
     };
-  }, [selectedRoomId]);
-
-  const messages = useFirestore("messages", condition);
+  }, [selectedFriend, selectedRoomId, uid]);
+  const messages = useFirestore(selectedRoomId ? "messages" : "message_single", condition);
+  const selectedFriendOnlineStatus = useMemo(() => {
+    if (!selectedFriend) return null;
+    const friend = friends.find((f) => f.uid === selectedFriend.uid);
+    return friend ? friend.isOnline : null;
+  }, [selectedFriend, friends]);
 
   useEffect(() => {
     if (messageListRef?.current) {
@@ -86,46 +123,69 @@ export default function ChatWindow() {
         messageListRef.current.scrollHeight + 50;
     }
   }, [messages]);
-
   return (
     <WrapperStyled>
-      {selectedRoom.id ? (
+      {selectedRoom.id || selectedFriend.uid ? (
         <>
           <HeaderStyled>
-            <div className="header__info">
-              <p className="header__title">{selectedRoom.name}</p>
-              <span className="header__description">
-                {selectedRoom.description}
-              </span>
-            </div>
-            <ButtonGroupStyled>
-              <Button
-                icon={<UserAddOutlined />}
-                type="text"
-                onClick={() => setIsInviteMemberVisible(true)}
-              >
-                Invite
-              </Button>
-              <Avatar.Group
-                size="small"
-                className="custom-avatar-group"
-                max={{ count: 2 }}
-              >
-                {members.map((member) => (
-                  <Tooltip
-                    title={member.displayName}
-                    key={member.id}
-                    overlayClassName="custom-tooltip"
+            <div className="header__info" data-test={JSON.stringify(selectedFriend)}>
+              {selectedFriend ? (
+                <>
+                  <p
+                    className="header__title"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
                   >
-                    <Avatar src={member.photoURL}>
-                      {member.photoURL
-                        ? ""
-                        : member.displayName?.charAt(0)?.toUpperCase()}
-                    </Avatar>
-                  </Tooltip>
-                ))}
-              </Avatar.Group>
-            </ButtonGroupStyled>
+                    <Avatar src={selectedFriend.photoURL} />
+                    <Badge
+                      color={selectedFriendOnlineStatus ? "green" : "gray"}
+                      dot
+                    />
+                    {selectedFriend.displayName}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="header__title">{selectedRoom.name}</p>
+                  <span className="header__description">
+                    {selectedRoom.description}
+                  </span>
+                </>
+              )}
+            </div>
+            {selectedRoom.id && (
+              <ButtonGroupStyled>
+                <Button
+                  icon={<UserAddOutlined />}
+                  type="text"
+                  onClick={() => setIsInviteMemberVisible(true)}
+                >
+                  Invite
+                </Button>
+                <Avatar.Group
+                  size="small"
+                  className="custom-avatar-group"
+                  max={{ count: 2 }}
+                >
+                  {members.map((member) => (
+                    <Tooltip
+                      title={member.displayName}
+                      key={member.id}
+                      overlayClassName="custom-tooltip"
+                    >
+                      <Avatar src={member.photoURL}>
+                        {member.photoURL
+                          ? ""
+                          : member.displayName?.charAt(0)?.toUpperCase()}
+                      </Avatar>
+                    </Tooltip>
+                  ))}
+                </Avatar.Group>
+              </ButtonGroupStyled>
+            )}
           </HeaderStyled>
           <ContentStyled>
             <MessageListStyled ref={messageListRef}>
@@ -157,7 +217,6 @@ export default function ChatWindow() {
                 width={20}
                 onClick={() => setShowPicker((val) => !val)}
                 style={{ marginRight: "10px", cursor: "pointer" }}
-                
               />
               {showPicker && (
                 <OutsideClickHandler

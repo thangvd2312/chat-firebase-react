@@ -1,10 +1,11 @@
-import { auth } from "@/firebase/config";
+import { auth, db } from "@/firebase/config";
 
 import { useHistory } from "react-router-dom";
 
 import { createContext, useEffect, useState } from "react";
 
 import { Spin } from "antd";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 export const AuthContext = createContext();
 function AuthProvider({ children }) {
@@ -16,25 +17,61 @@ function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        const { providerId } = user.providerData.find(elm => elm.email === user.email);
-        const { displayName, email, uid, photoURL } = user;
-        setUser({ displayName, email, uid, photoURL, providerId });
+        const { email } = user;
+        const userQuery = query(
+          collection(db, "users"),
+          where("email", "==", email)
+        );
+        const unsubscribeUser = onSnapshot(userQuery, (userSnapshot) => {
+          if (!userSnapshot.empty) {
+            const userDoc = userSnapshot.docs[0];
+            const userData = userDoc.data();
+            const {
+              displayName,
+              uid,
+              photoURL,
+              friends = [],
+              providerId,
+            } = userData;
+
+            setUser({ displayName, email, uid, photoURL, friends, providerId });
+            setIsLoading(false);
+            history.push("/");
+          } else {
+            console.error("No user found with the given email.");
+            setIsLoading(false);
+            history.push("/login");
+          }
+        });
+
+        return () => {
+          unsubscribeUser();
+        };
+      } else {
+        setUser({});
         setIsLoading(false);
-        history.push("/");
-        return;
+        history.push("/login");
       }
-      setUser({});
-      setIsLoading(false);
-      history.push("/login");
-      return;
     });
+
     return () => {
       unsubscribe();
     };
   }, [history]);
   return (
     <AuthContext.Provider value={{ user }}>
-      {isLoading ? <Spin style={{ position: 'fixed', inset: 0 }} /> : children}
+      {isLoading ? (
+        <Spin
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        />
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }

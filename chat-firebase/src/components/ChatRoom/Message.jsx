@@ -50,7 +50,7 @@ export default function Message({ text, displayName, createdAt, photoURL, type, 
         </Typography.Text>
       </div>
       <div>
-        {['sticker', 'gif'].includes(type) || isValidURL(text) ? (
+        {(['sticker', 'gif'].includes(type) || isValidURL(text)) ? (
           <img src={text} alt="sticker" className='content' style={{ width: '100%', maxWidth: '150px', height: 'auto' }} />
         ) : (
           <Typography.Text className='content'>{text}</Typography.Text>

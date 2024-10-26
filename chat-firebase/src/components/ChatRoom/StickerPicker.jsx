@@ -140,8 +140,6 @@ const StickerPopup = ({ handleSelectedReactIcon }) => {
     });
   }
 
-
-
   const fetchGifs = async (query, offset) => {
     try {
       const endpoint = query ? "search" : "trending";

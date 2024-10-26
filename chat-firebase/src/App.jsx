@@ -10,7 +10,7 @@ import AddMemberToRoom from '@/components/Modals/AddMemberToRoom';
 import useBlockDevTools from '@/hooks/useBlockDevTools';
 
 function App() {
-  useBlockDevTools();
+  // useBlockDevTools();
   return (
     <BrowserRouter>
       <AuthProvider>

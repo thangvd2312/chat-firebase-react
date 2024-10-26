@@ -1,8 +1,10 @@
+import AddFriendModal from "@/components/ChatRoom/AddFriendModal";
 import { AppContext } from "@/context/AppProvider";
 import { AuthContext } from "@/context/AuthProvider";
 import { auth, db } from "@/firebase/config";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
-import { Avatar, Button, Typography } from "antd";
+import { UserAddOutlined, UsergroupAddOutlined } from "@ant-design/icons";
+import { Avatar, Button, Tooltip, Typography } from "antd";
 import { signOut } from "firebase/auth";
 import {
   collection,
@@ -12,24 +14,63 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import styled from "styled-components";
 const WrapperStyled = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(82, 38, 83);
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
 
   .username {
-    color: white;
-    margin-left: 5px;
+    color: black;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .add-friend-button,
+  .add-group-button {
+    margin-left: 10px;
+  }
+
+  .logout-button {
+    margin-left: auto;
   }
 `;
+
+const UserInfoStyled = styled.div`
+  margin-bottom: 16px;
+  text-align: center;
+
+  .user-name {
+    font-weight: bold;
+    color: #ffffff;
+  }
+
+  .logout-button {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+`;
+
 export default function UserInfo() {
   const {
     user: { displayName, photoURL, uid, providerId },
   } = useContext(AuthContext);
-  const { clearState } = useContext(AppContext);
+  const { clearState, setIsAddRoomVisible } = useContext(AppContext);
+  const [isAddFriendModalVisible, setIsAddFriendModalVisible] = useState(false);
   useOnlineStatus();
   async function findUserByUidAndProviderId(uid, providerId) {
     const userQuery = query(
@@ -52,23 +93,47 @@ export default function UserInfo() {
     });
   }
 
+
   return (
-    <WrapperStyled>
-      <div>
-        <Avatar src={photoURL}>
-          {photoURL ? "" : displayName?.charAt(0)?.toUpperCase()}{" "}
-        </Avatar>
-        <Typography.Text className="username">{displayName}</Typography.Text>
-      </div>
-      <Button
-        ghost
-        onClick={() => {
-          handleLogout();
-          clearState();
-        }}
-      >
-        Logout
-      </Button>
-    </WrapperStyled>
+    <UserInfoStyled>
+      <WrapperStyled>
+        <div className="user-info">
+          <Avatar src={photoURL}>
+            {photoURL ? "" : displayName?.charAt(0)?.toUpperCase()}{" "}
+          </Avatar>
+          <div className="username">
+            <Typography.Text>{displayName}</Typography.Text>
+            <Tooltip title="Add Friend">
+              <Button
+                icon={<UserAddOutlined />}
+                className="add-friend-button"
+                onClick={() => setIsAddFriendModalVisible(true)}
+              />
+            </Tooltip>
+            <Tooltip title="Add Group">
+              <Button
+                icon={<UsergroupAddOutlined />}
+                className="add-group-button"
+                onClick={() => setIsAddRoomVisible(true)}
+              />
+            </Tooltip>
+          </div>
+          <AddFriendModal
+            isAddFriendModalVisible={isAddFriendModalVisible}
+            setIsAddFriendModalVisible={setIsAddFriendModalVisible}
+          />
+          <Button
+            onClick={() => {
+              handleLogout();
+              clearState();
+            }}
+            className="logout-button"
+          >
+            Logout
+          </Button>
+        </div>
+      </WrapperStyled>
+ 
+    </UserInfoStyled>
   );
 }
