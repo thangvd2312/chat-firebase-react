@@ -78,25 +78,16 @@ export default function ChatWindow() {
       return;
     }
     if (["sticker", "gif"].includes(type)) {
-      if (selectedRoomId) {
-        addDocument("messages", {
+      const roomId = selectedRoomId ? selectedRoomId : (selectedFriend ? [uid, selectedFriend.uid].sort((a, b) => a.localeCompare(b)).join('_') : '');
+      const mesageCollection = selectedRoomId ? 'messages' : 'message_single';
+      if (roomId) {
+        addDocument(mesageCollection, {
           text: data,
           uid,
           photoURL,
           displayName,
-          roomId: selectedRoomId,
+          roomId: roomId,
           type: "sticker",
-        });
-      }
-      if (selectedFriend) {
-        addDocument("message_single", {
-          text: inputMessage,
-          uid,
-          photoURL,
-          displayName,
-          roomId: [uid, selectedFriend.uid].sort((a, b) => a.localeCompare(b)).join('_'),
-          type: "sticker",
-          createdAt: new Date(),
         });
       }
       return;

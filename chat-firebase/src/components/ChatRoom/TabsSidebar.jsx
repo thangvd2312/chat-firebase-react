@@ -204,14 +204,16 @@ export default function TabsSidebar({ setIsSidebarOpen }) {
       const user2Snapshot = await getDocs(user2Query);
       const user2Doc = user2Snapshot.docs[0];
       if (user1Doc) {
+        const currentFriends1 = user1Doc.data().friends || []; 
         await updateDoc(user1Doc.ref, {
-          friends: arrayUnion(user2Uid)
+          friends: arrayUnion(...currentFriends1, user2Uid)
         });
       }
-  
+
       if (user2Doc) {
+        const currentFriends2 = user2Doc.data().friends || [];
         await updateDoc(user2Doc.ref, {
-          friends: arrayUnion(user1Uid)
+          friends: arrayUnion(...currentFriends2, user1Uid)
         });
       }
       await deleteDoc(doc(db, "friend_requests", requestId.id));

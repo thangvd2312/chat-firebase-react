@@ -26,6 +26,7 @@ const FriendItem = styled.div`
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 `;
 
 const FriendName = styled(Typography.Text)`
@@ -42,7 +43,7 @@ export default function FriendList() {
 
   const handleChatClick = (friend) => {
     setSelectedFriendId(friend.uid);
-    setSelectedRoomId('');
+    setSelectedRoomId("");
   };
 
   useEffect(() => {
@@ -89,11 +90,14 @@ export default function FriendList() {
               color={userStatuses[friend.uid]?.isOnline ? "green" : "gray"}
               dot
             />
+            <img
+              src={friend.photoURL}
+              alt=""
+              width={20}
+              style={{ borderRadius: 20, marginLeft: "5px" }}
+            />
             <FriendName>
-              <span>
-                {friend.displayName}{" "}
-                {userStatuses[friend.uid]?.isOnline ? "(Online)" : "(Offline)"}
-              </span>
+              <span>{friend.displayName}</span>
             </FriendName>
           </FriendItem>
         ))
